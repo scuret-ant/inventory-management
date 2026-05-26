@@ -11,6 +11,7 @@
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">{{ t('inventory.stockLevels') }} ({{ filteredItems.length }} {{ t('inventory.skus') }})</h3>
+          <div class="header-actions">
           <div class="search-box">
             <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
@@ -31,6 +32,8 @@
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
               </svg>
             </button>
+          </div>
+          <button class="export-btn" @click="handleExport">{{ t('common.exportCsv') }}</button>
           </div>
         </div>
         <div class="table-container">
@@ -89,6 +92,7 @@ import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
 import InventoryDetailModal from '../components/InventoryDetailModal.vue'
+import { exportToCsv } from '../utils/csv'
 
 export default {
   name: 'Inventory',
@@ -201,6 +205,24 @@ export default {
       showItemModal.value = true
     }
 
+    const handleExport = () => {
+      exportToCsv(
+        `inventory-${new Date().toISOString().slice(0, 10)}.csv`,
+        filteredItems.value,
+        [
+          { key: 'sku', label: t('inventory.table.sku') },
+          { key: 'name', label: t('inventory.table.itemName'), format: r => translateProductName(r.name) },
+          { key: 'category', label: t('inventory.table.category'), format: r => translateCategory(r.category) },
+          { key: 'quantity_on_hand', label: t('inventory.table.quantityOnHand') },
+          { key: 'reorder_point', label: t('inventory.table.reorderPoint') },
+          { key: 'unit_cost', label: t('inventory.table.unitCost') },
+          { key: 'total_value', label: t('inventory.table.totalValue'), format: r => (r.quantity_on_hand * r.unit_cost).toFixed(2) },
+          { key: 'location', label: t('inventory.table.location'), format: r => translateWarehouse(r.location) },
+          { key: 'status', label: t('inventory.table.status'), format: r => getStockStatus(r) }
+        ]
+      )
+    }
+
     onMounted(loadInventory)
 
     return {
@@ -218,7 +240,8 @@ export default {
       showItemDetail,
       currencySymbol,
       translateProductName,
-      translateWarehouse
+      translateWarehouse,
+      handleExport
     }
   }
 }
@@ -244,7 +267,32 @@ export default {
   align-items: center;
   gap: 1.5rem;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.export-btn {
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-body);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.export-btn:hover {
+  background: var(--surface-alt);
+  border-color: var(--text-muted);
 }
 
 .card-title {

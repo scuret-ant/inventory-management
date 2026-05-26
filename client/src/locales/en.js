@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
+    reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -106,6 +108,10 @@ export default {
     title: 'Orders',
     description: 'View and manage customer orders',
     allOrders: 'All Orders',
+    searchPlaceholder: 'Search by order number, customer, or SKU...',
+    clearSearch: 'Clear search',
+    submittedOrders: 'Submitted Restocking Orders',
+    noSubmittedOrders: 'No restocking orders submitted yet.',
     totalOrders: 'Total Orders',
     totalRevenue: 'Total Revenue',
     avgOrderValue: 'Avg Order Value',
@@ -116,6 +122,8 @@ export default {
       orderNumber: 'Order Number',
       orderId: 'Order ID',
       orderDate: 'Order Date',
+      submissionDate: 'Submission Date',
+      itemCount: 'Items',
       date: 'Date',
       customer: 'Customer',
       category: 'Category',
@@ -126,6 +134,64 @@ export default {
       status: 'Status',
       expectedDelivery: 'Expected Delivery',
       actualDelivery: 'Actual Delivery'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking',
+    description: 'Plan a budget-constrained restocking order from current demand forecasts.',
+    budget: 'Available Budget',
+    budgetRemaining: 'Remaining',
+    budgetExceeded: 'Total exceeds budget',
+    recommendations: 'Recommendations',
+    selectedItems: 'Selected Items',
+    noRecommendations: 'No recommendations fit the current budget.',
+    placeOrder: 'Place Order',
+    placedSuccess: 'Order submitted. See it in the Orders tab.',
+    placeFailed: 'Failed to submit order',
+    addToOrder: 'Add',
+    remove: 'Remove',
+    runningTotal: 'Running Total',
+    table: {
+      sku: 'SKU',
+      itemName: 'Item Name',
+      forecastedDemand: 'Forecasted Demand',
+      onHand: 'On Hand',
+      unitCost: 'Unit Cost',
+      recommendedQty: 'Recommended Qty',
+      quantity: 'Quantity',
+      lineTotal: 'Line Total',
+      actions: 'Actions'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    loading: 'Loading reports...',
+    loadFailed: 'Failed to load reports',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyRevenueTrend: 'Monthly Revenue Trend',
+    momAnalysis: 'Month-over-Month Analysis',
+    table: {
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    summary: {
+      totalRevenueYtd: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYtd: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
     }
   },
 
@@ -204,6 +270,7 @@ export default {
     shipped: 'Shipped',
     processing: 'Processing',
     backordered: 'Backordered',
+    submitted: 'Submitted',
     inStock: 'In Stock',
     lowStock: 'Low Stock',
     adequate: 'Adequate'
@@ -323,6 +390,23 @@ export default {
     search: 'Search',
     filter: 'Filter',
     export: 'Export',
+    exportCsv: 'Export CSV',
+    noResults: 'No results found',
     items: 'items'
+  },
+
+  // Theme toggle
+  theme: {
+    light: 'Light mode',
+    dark: 'Dark mode',
+    toggle: 'Toggle theme'
+  },
+
+  // Low-stock alerts
+  alerts: {
+    title: 'Low stock alerts',
+    itemsBelowReorder: '{count} items below reorder point',
+    empty: 'All stock levels are healthy',
+    viewAll: 'View all in Inventory'
   }
 }
