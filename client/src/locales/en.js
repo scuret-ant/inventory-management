@@ -7,6 +7,7 @@ export default {
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
     restocking: 'Restocking',
+    reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -107,6 +108,8 @@ export default {
     title: 'Orders',
     description: 'View and manage customer orders',
     allOrders: 'All Orders',
+    searchPlaceholder: 'Search by order number, customer, or SKU...',
+    clearSearch: 'Clear search',
     submittedOrders: 'Submitted Restocking Orders',
     noSubmittedOrders: 'No restocking orders submitted yet.',
     totalOrders: 'Total Orders',
@@ -160,6 +163,35 @@ export default {
       quantity: 'Quantity',
       lineTotal: 'Line Total',
       actions: 'Actions'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    loading: 'Loading reports...',
+    loadFailed: 'Failed to load reports',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyRevenueTrend: 'Monthly Revenue Trend',
+    momAnalysis: 'Month-over-Month Analysis',
+    table: {
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    summary: {
+      totalRevenueYtd: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYtd: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
     }
   },
 
@@ -358,6 +390,23 @@ export default {
     search: 'Search',
     filter: 'Filter',
     export: 'Export',
+    exportCsv: 'Export CSV',
+    noResults: 'No results found',
     items: 'items'
+  },
+
+  // Theme toggle
+  theme: {
+    light: 'Light mode',
+    dark: 'Dark mode',
+    toggle: 'Toggle theme'
+  },
+
+  // Low-stock alerts
+  alerts: {
+    title: 'Low stock alerts',
+    itemsBelowReorder: '{count} items below reorder point',
+    empty: 'All stock levels are healthy',
+    viewAll: 'View all in Inventory'
   }
 }

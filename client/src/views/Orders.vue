@@ -64,10 +64,35 @@
 
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">{{ t('orders.allOrders') }} ({{ orders.length }})</h3>
+          <h3 class="card-title">{{ t('orders.allOrders') }} ({{ filteredOrders.length }})</h3>
+          <div class="card-actions">
+            <div class="search-box">
+              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+              </svg>
+              <input
+                v-model="searchQuery"
+                type="text"
+                :placeholder="t('orders.searchPlaceholder')"
+                class="search-input"
+              />
+              <button
+                v-if="searchQuery"
+                @click="searchQuery = ''"
+                class="clear-search"
+                :title="t('orders.clearSearch')"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <button class="export-btn" @click="handleExport">{{ t('common.exportCsv') }}</button>
+          </div>
         </div>
         <div class="table-container">
-          <table class="orders-table">
+          <p v-if="filteredOrders.length === 0 && searchQuery" class="no-data">{{ t('common.noResults') }}</p>
+          <table v-else class="orders-table">
             <thead>
               <tr>
                 <th class="col-order-number">{{ t('orders.table.orderNumber') }}</th>
@@ -80,7 +105,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="order in orders" :key="order.id">
+              <tr v-for="order in filteredOrders" :key="order.id">
                 <td class="col-order-number"><strong>{{ order.order_number }}</strong></td>
                 <td class="col-customer">{{ translateCustomerName(order.customer) }}</td>
                 <td class="col-items">
@@ -118,6 +143,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
+import { exportToCsv } from '../utils/csv'
 
 export default {
   name: 'Orders',
@@ -131,6 +157,18 @@ export default {
     const error = ref(null)
     const orders = ref([])
     const submittedOrders = ref([])
+    const searchQuery = ref('')
+
+    // Filter All Orders by order number, customer, or any item SKU
+    const filteredOrders = computed(() => {
+      const q = searchQuery.value.trim().toLowerCase()
+      if (!q) return orders.value
+      return orders.value.filter(order =>
+        order.order_number.toLowerCase().includes(q) ||
+        order.customer.toLowerCase().includes(q) ||
+        order.items.some(item => item.sku.toLowerCase().includes(q))
+      )
+    })
 
     // Use shared filters
     const {
@@ -201,6 +239,22 @@ export default {
       })
     }
 
+    const handleExport = () => {
+      exportToCsv(
+        `orders-${new Date().toISOString().slice(0, 10)}.csv`,
+        filteredOrders.value,
+        [
+          { key: 'order_number', label: t('orders.table.orderNumber') },
+          { key: 'customer', label: t('orders.table.customer'), format: r => translateCustomerName(r.customer) },
+          { key: 'status', label: t('orders.table.status'), format: r => t(`status.${r.status.toLowerCase()}`) },
+          { key: 'order_date', label: t('orders.table.orderDate'), format: r => formatDate(r.order_date) },
+          { key: 'expected_delivery', label: t('orders.table.expectedDelivery'), format: r => formatDate(r.expected_delivery) },
+          { key: 'total_value', label: t('orders.table.totalValue') },
+          { key: 'items', label: t('orders.table.items'), format: r => r.items.map(i => `${i.sku} x ${i.quantity}`).join('; ') }
+        ]
+      )
+    }
+
     onMounted(loadAll)
 
     return {
@@ -209,12 +263,15 @@ export default {
       error,
       orders,
       submittedOrders,
+      searchQuery,
+      filteredOrders,
       getOrdersByStatus,
       getOrderStatusClass,
       formatDate,
       currencySymbol,
       translateProductName,
-      translateCustomerName
+      translateCustomerName,
+      handleExport
     }
   }
 }
@@ -330,5 +387,95 @@ export default {
   padding: 1.5rem;
   color: #64748b;
   text-align: center;
+}
+
+/* Card header actions: search + export sit side by side */
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 280px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  width: 18px;
+  height: 18px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem 2.5rem 0.5rem 2.5rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--text);
+  background: var(--surface-alt);
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-input::placeholder {
+  color: #94a3b8;
+}
+
+.clear-search {
+  position: absolute;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-search:hover {
+  background: var(--surface-alt);
+  color: var(--text-muted);
+}
+
+.clear-search svg {
+  width: 18px;
+  height: 18px;
+}
+
+.export-btn {
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-body);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.export-btn:hover {
+  background: var(--surface-alt);
+  border-color: var(--text-muted);
 }
 </style>
