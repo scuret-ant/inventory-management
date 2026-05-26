@@ -29,6 +29,41 @@
 
       <div class="card">
         <div class="card-header">
+          <h3 class="card-title">{{ t('orders.submittedOrders') }} ({{ submittedOrders.length }})</h3>
+        </div>
+        <div class="table-container">
+          <table class="orders-table" v-if="submittedOrders.length > 0">
+            <thead>
+              <tr>
+                <th class="col-order-number">{{ t('orders.table.orderNumber') }}</th>
+                <th class="col-date">{{ t('orders.table.submissionDate') }}</th>
+                <th class="col-date">{{ t('orders.table.expectedDelivery') }}</th>
+                <th>{{ t('orders.table.itemCount') }}</th>
+                <th class="col-value">{{ t('orders.table.totalValue') }}</th>
+                <th class="col-status">{{ t('orders.table.status') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="sub in submittedOrders" :key="sub.id">
+                <td class="col-order-number"><strong>{{ sub.order_number }}</strong></td>
+                <td class="col-date">{{ formatDate(sub.submission_date) }}</td>
+                <td class="col-date">{{ formatDate(sub.expected_delivery) }}</td>
+                <td>{{ sub.item_count }}</td>
+                <td class="col-value"><strong>{{ currencySymbol }}{{ sub.total_value.toLocaleString() }}</strong></td>
+                <td class="col-status">
+                  <span :class="['badge', getOrderStatusClass(sub.status)]">
+                    {{ t(`status.${sub.status.toLowerCase()}`) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p v-else class="no-data">{{ t('orders.noSubmittedOrders') }}</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
           <h3 class="card-title">{{ t('orders.allOrders') }} ({{ orders.length }})</h3>
         </div>
         <div class="table-container">
@@ -95,6 +130,7 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
+    const submittedOrders = ref([])
 
     // Use shared filters
     const {
@@ -107,7 +143,6 @@ export default {
 
     const loadOrders = async () => {
       try {
-        loading.value = true
         const filters = getCurrentFilters()
         const fetchedOrders = await api.getOrders(filters)
 
@@ -119,14 +154,27 @@ export default {
         })
       } catch (err) {
         error.value = 'Failed to load orders: ' + err.message
-      } finally {
-        loading.value = false
       }
+    }
+
+    const loadSubmittedOrders = async () => {
+      try {
+        submittedOrders.value = await api.getRestockingOrders()
+      } catch (err) {
+        error.value = 'Failed to load submitted orders: ' + err.message
+      }
+    }
+
+    const loadAll = async () => {
+      loading.value = true
+      error.value = null
+      await Promise.all([loadOrders(), loadSubmittedOrders()])
+      loading.value = false
     }
 
     // Watch for filter changes and reload data
     watch([selectedPeriod, selectedLocation, selectedCategory, selectedStatus], () => {
-      loadOrders()
+      loadAll()
     })
 
     const getOrdersByStatus = (status) => {
@@ -153,13 +201,14 @@ export default {
       })
     }
 
-    onMounted(loadOrders)
+    onMounted(loadAll)
 
     return {
       t,
       loading,
       error,
       orders,
+      submittedOrders,
       getOrdersByStatus,
       getOrderStatusClass,
       formatDate,
@@ -275,5 +324,11 @@ export default {
 .item-meta {
   font-size: 0.813rem;
   color: #64748b;
+}
+
+.no-data {
+  padding: 1.5rem;
+  color: #64748b;
+  text-align: center;
 }
 </style>

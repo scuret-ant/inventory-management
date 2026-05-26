@@ -35,5 +35,10 @@ recent_transactions = load_json_file('transactions.json')
 # Load purchase orders
 purchase_orders = load_json_file('purchase_orders.json')
 
+# In-memory store for user-submitted restocking orders.
+# No seed JSON: starts empty each server start. Matches the demo's in-memory
+# semantics (lost on restart); unlike the other lists, this one is mutated at runtime.
+restocking_orders: list = []
+
 # All data is now loaded from JSON files in the data/ directory
 # This allows for easier maintenance and updates of the sample data

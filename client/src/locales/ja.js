@@ -6,6 +6,7 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '補充',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -106,6 +107,8 @@ export default {
     title: '注文',
     description: '顧客注文の表示と管理',
     allOrders: 'すべての注文',
+    submittedOrders: '送信済み補充注文',
+    noSubmittedOrders: 'まだ補充注文が送信されていません。',
     totalOrders: '総注文数',
     totalRevenue: '総収益',
     avgOrderValue: '平均注文額',
@@ -116,6 +119,8 @@ export default {
       orderNumber: '注文番号',
       orderId: '注文ID',
       orderDate: '注文日',
+      submissionDate: '送信日',
+      itemCount: '品目数',
       date: '日付',
       customer: '顧客',
       category: 'カテゴリ',
@@ -126,6 +131,35 @@ export default {
       status: 'ステータス',
       expectedDelivery: '予定配達日',
       actualDelivery: '実際の配達日'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充',
+    description: '現在の需要予測から予算内で補充注文を計画します。',
+    budget: '利用可能予算',
+    budgetRemaining: '残額',
+    budgetExceeded: '合計が予算を超えています',
+    recommendations: 'おすすめ',
+    selectedItems: '選択中の品目',
+    noRecommendations: '現在の予算に合うおすすめはありません。',
+    placeOrder: '注文する',
+    placedSuccess: '注文を送信しました。注文タブでご確認ください。',
+    placeFailed: '注文の送信に失敗しました',
+    addToOrder: '追加',
+    remove: '削除',
+    runningTotal: '現在の合計',
+    table: {
+      sku: 'SKU',
+      itemName: '品目名',
+      forecastedDemand: '予測需要',
+      onHand: '手持在庫',
+      unitCost: '単価',
+      recommendedQty: 'おすすめ数量',
+      quantity: '数量',
+      lineTotal: '小計',
+      actions: '操作'
     }
   },
 
@@ -204,6 +238,7 @@ export default {
     shipped: '出荷済み',
     processing: '処理中',
     backordered: 'バックオーダー',
+    submitted: '送信済み',
     inStock: '在庫あり',
     lowStock: '在庫僅少',
     adequate: '適量'

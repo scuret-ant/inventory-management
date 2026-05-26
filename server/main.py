@@ -1,8 +1,11 @@
+from datetime import date, timedelta
+from uuid import uuid4
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
-from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
+from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders, restocking_orders
 
 app = FastAPI(title="Factory Inventory Management System")
 
@@ -119,6 +122,26 @@ class CreatePurchaseOrderRequest(BaseModel):
     unit_cost: float
     expected_delivery_date: str
     notes: Optional[str] = None
+
+class RestockingOrderItem(BaseModel):
+    sku: str
+    name: str
+    quantity: int
+    unit_cost: float
+
+class CreateRestockingOrderRequest(BaseModel):
+    items: List[RestockingOrderItem]
+    budget: float
+
+class RestockingOrder(BaseModel):
+    id: str
+    order_number: str
+    submission_date: str
+    expected_delivery: str
+    items: List[RestockingOrderItem]
+    item_count: int
+    total_value: float
+    status: str
 
 # API endpoints
 @app.get("/")
@@ -303,6 +326,42 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.post("/api/restocking-orders", response_model=RestockingOrder, status_code=201)
+def create_restocking_order(payload: CreateRestockingOrderRequest):
+    """Create a new user-submitted restocking order."""
+    if not payload.items:
+        raise HTTPException(status_code=400, detail="Order must contain at least one item")
+
+    total_value = round(sum(item.quantity * item.unit_cost for item in payload.items), 2)
+
+    # Reject when the client-side cart total exceeds the budget the user set.
+    # The frontend already prevents this, but we re-check server-side so direct API
+    # callers can't bypass it.
+    if total_value > payload.budget:
+        raise HTTPException(status_code=400, detail="Order total exceeds budget")
+
+    submission_date = date.today()
+    # Fixed 7-day mock SLA — the demo has no supplier-specific lead times.
+    expected_delivery = submission_date + timedelta(days=7)
+
+    new_order = {
+        "id": f"rst-{uuid4().hex[:8]}",
+        "order_number": f"RST-{len(restocking_orders) + 1:04d}",
+        "submission_date": submission_date.isoformat(),
+        "expected_delivery": expected_delivery.isoformat(),
+        "items": [item.model_dump() for item in payload.items],
+        "item_count": len(payload.items),
+        "total_value": total_value,
+        "status": "Submitted",
+    }
+    restocking_orders.append(new_order)
+    return new_order
+
+@app.get("/api/restocking-orders", response_model=List[RestockingOrder])
+def list_restocking_orders():
+    """Return all user-submitted restocking orders (in-memory, cleared on server restart)."""
+    return restocking_orders
 
 if __name__ == "__main__":
     import uvicorn
